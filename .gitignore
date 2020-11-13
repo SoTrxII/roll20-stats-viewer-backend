@@ -1,0 +1,6 @@
+node_modules
+start-database.sh
+dist
+.env
+.idea
+yarn-error.log
