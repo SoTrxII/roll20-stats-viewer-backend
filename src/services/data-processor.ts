@@ -5,6 +5,7 @@ import { IDataProcessor } from "../@types/data-processor";
 import { ChatMessage, RollChatMessage } from "../@types/chat-message";
 import { Session } from "../@types/session";
 import { CampaignBasicInfo, CampaignGeneralInfo } from "../@types/campaigns";
+import { Player } from "../@types/player";
 
 @injectable()
 export class DataExtrapolationProcessor implements IDataProcessor {
@@ -72,6 +73,9 @@ export class DataExtrapolationProcessor implements IDataProcessor {
     return sessions;
   }
 
+  async getPlayers(campaignId: string): Promise<Player[]> {
+    return this.scrapper.getPlayers(campaignId);
+  }
   async getCampaignsGeneralInfos(
     campaignId: string
   ): Promise<CampaignGeneralInfo> {

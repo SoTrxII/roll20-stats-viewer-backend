@@ -69,4 +69,20 @@ export class InfoController {
       res.end(e.message);
     }
   }
+  @httpGet(":id/players")
+  public async getPlayersOfCampaign(
+    @response() res: express.Response,
+    @requestParam("id") id: string
+  ) {
+    try {
+      const players = await this.processor.getPlayers(id);
+      res.header("Content-type", "application/json");
+      res.statusCode = 200;
+      res.end(JSON.stringify(players));
+    } catch (e) {
+      res.statusCode = 500;
+      console.error(e);
+      res.end(e.message);
+    }
+  }
 }
