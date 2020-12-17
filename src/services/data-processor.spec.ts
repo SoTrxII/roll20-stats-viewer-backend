@@ -14,7 +14,6 @@ describe("Scrapper", () => {
   it("Should detect sessions", async () => {
     const sessions  = await processor.getSessions("2988505")
     const mapped = sessions[45].messages;
-    console.log(mapped)
   }, 20000);
 
 });

@@ -9,6 +9,9 @@ export const memoize = (options?: Options<any>): MethodDecorator => {
     propertyKey: string,
     propertyDescriptor: PropertyDescriptor
   ) => {
-    propertyDescriptor.value = memoizee(propertyDescriptor.value, options);
+    propertyDescriptor.value = memoizee(
+      propertyDescriptor.value,
+      options
+    );
   };
 };

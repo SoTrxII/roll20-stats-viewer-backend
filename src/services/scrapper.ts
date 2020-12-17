@@ -19,6 +19,7 @@ export class Scrapper implements IScrapper {
   private isLoggedIn = false;
   private static readonly ENDPOINTS = {
     login: `${Scrapper.BASE_URL}/sessions/create`,
+    logout: `${Scrapper.BASE_URL}/sessions/destroy`,
     loginRedirect: `${Scrapper.BASE_URL}/sessions/new`,
     allCampaigns: (page: number) =>
       `${Scrapper.BASE_URL}/campaigns/search?p=${page}`,
@@ -42,6 +43,7 @@ export class Scrapper implements IScrapper {
         return encodeURIComponent(key) + "=" + encodeURIComponent(infos[key]);
       })
       .join("&");
+    await fetch(Scrapper.ENDPOINTS.logout);
     const res = await fetch(Scrapper.ENDPOINTS.login, {
       method: "POST",
       body: searchParams,
@@ -50,7 +52,8 @@ export class Scrapper implements IScrapper {
         Origin: "https://app.roll20.net",
       },
     });
-    if (res.headers.get("set-cookie") === undefined) {
+    const t = await res.text();
+    if (t?.includes("The email or password you entered is incorrect")) {
       throw new ScrapperError(
         `Invalid credentials provided, could not login to R20`
       );
@@ -88,13 +91,26 @@ export class Scrapper implements IScrapper {
     f.write(rawText);
   }
 
+  async getMessages(campaignId: string): Promise<ChatMessage[]> {
+    //Calling the proxy method to ensure the cache takes into account multi-users
+    return this.getMessagesMemo(
+      campaignId,
+      this.options.login,
+      this.options.password
+    );
+  }
+
   @memoize({
     promise: true,
     // 1h
     maxAge: 1 * 3600,
     preFetch: true,
   })
-  async getMessages(campaignId: string): Promise<ChatMessage[]> {
+  private async getMessagesMemo(
+    campaignId: string,
+    login: string,
+    password: string
+  ): Promise<ChatMessage[]> {
     const res = await this.makeAuthedRequest(
       Scrapper.ENDPOINTS.archives(campaignId)
     );
@@ -121,12 +137,6 @@ export class Scrapper implements IScrapper {
     return messages;
   }
 
-  @memoize({
-    promise: true,
-    // 1h
-    maxAge: 1 * 3600,
-    preFetch: true,
-  })
   private async getDetailsPageDomRoot(campaignId: string): Promise<Root> {
     const res = await this.makeAuthedRequest(
       Scrapper.ENDPOINTS.details(campaignId)
@@ -134,13 +144,24 @@ export class Scrapper implements IScrapper {
     return load(await res.text());
   }
 
+  async getPlayers(campaignId: string): Promise<Player[]> {
+    return this.getPlayersMemo(
+      campaignId,
+      this.options.login,
+      this.options.password
+    );
+  }
   @memoize({
     promise: true,
     // 1h
     maxAge: 1 * 3600,
     preFetch: true,
   })
-  async getPlayers(campaignId: string): Promise<Player[]> {
+  private async getPlayersMemo(
+    campaignId: string,
+    login: string,
+    password: string
+  ): Promise<Player[]> {
     const $ = await this.getDetailsPageDomRoot(campaignId);
     const players = [];
 
@@ -183,13 +204,19 @@ export class Scrapper implements IScrapper {
     return players;
   }
 
+  async getCampaignsList(): Promise<CampaignBasicInfo[]> {
+    return this.getCampaignsListMemo(this.options.login, this.options.password);
+  }
   @memoize({
     promise: true,
     // 1h
     maxAge: 1 * 3600,
     preFetch: true,
   })
-  async getCampaignsList(): Promise<CampaignBasicInfo[]> {
+  async getCampaignsListMemo(
+    login: string,
+    password: string
+  ): Promise<CampaignBasicInfo[]> {
     const campaigns = [];
     let hasResults = true;
     let i = 1;

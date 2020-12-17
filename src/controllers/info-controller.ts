@@ -9,12 +9,13 @@ import { inject } from "inversify";
 import { TYPES } from "../types";
 import * as express from "express";
 import { IDataProcessor } from "../@types/data-processor";
+import { ScrapperError } from "../services/scrapper";
 
 @controller("/campaign/")
 export class InfoController {
   constructor(@inject(TYPES.DataProcessor) private processor: IDataProcessor) {}
 
-  @httpGet("list")
+  @httpGet("list", TYPES.CredentialsMiddleware)
   public async getCampaignsList(@response() res: express.Response) {
     try {
       const campaigns = await this.processor.getAllCampaignsBasicInfos();
@@ -22,11 +23,16 @@ export class InfoController {
       res.statusCode = 200;
       res.end(JSON.stringify(campaigns));
     } catch (e) {
-      res.statusCode = 500;
+      console.error(e);
+      if (e instanceof ScrapperError) {
+        res.statusCode = 401;
+      } else {
+        res.statusCode = 500;
+      }
       res.end(e.message);
     }
   }
-  @httpGet(":id")
+  @httpGet(":id", TYPES.CredentialsMiddleware)
   public async getCampaignGeneralInfo(
     @response() res: express.Response,
     @requestParam("id") id: string
@@ -37,12 +43,16 @@ export class InfoController {
       res.statusCode = 200;
       res.end(JSON.stringify(campaignInfo));
     } catch (e) {
-      res.statusCode = 500;
+      if (e instanceof ScrapperError) {
+        res.statusCode = 401;
+      } else {
+        res.statusCode = 500;
+      }
       console.error(e);
       res.end(e.message);
     }
   }
-  @httpGet(":id/session/:sid")
+  @httpGet(":id/session/:sid", TYPES.CredentialsMiddleware)
   public async getSessionDetails(
     @response() res: express.Response,
     @requestParam("id") id: string,
@@ -64,12 +74,17 @@ export class InfoController {
       res.statusCode = 200;
       res.end(JSON.stringify(sessions[sid]));
     } catch (e) {
-      res.statusCode = 500;
+      if (e instanceof ScrapperError) {
+        res.statusCode = 401;
+      } else {
+        res.statusCode = 500;
+      }
       console.error(e);
       res.end(e.message);
     }
   }
-  @httpGet(":id/players")
+
+  @httpGet(":id/players", TYPES.CredentialsMiddleware)
   public async getPlayersOfCampaign(
     @response() res: express.Response,
     @requestParam("id") id: string
@@ -80,7 +95,11 @@ export class InfoController {
       res.statusCode = 200;
       res.end(JSON.stringify(players));
     } catch (e) {
-      res.statusCode = 500;
+      if (e instanceof ScrapperError) {
+        res.statusCode = 401;
+      } else {
+        res.statusCode = 500;
+      }
       console.error(e);
       res.end(e.message);
     }

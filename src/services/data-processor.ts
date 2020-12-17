@@ -42,8 +42,6 @@ export class DataExtrapolationProcessor implements IDataProcessor {
     if (rollsInCurrentSession.length !== 0) {
       sessions.push(rollsInCurrentSession);
     }
-    console.log("Before filtering");
-    console.log(sessions.length);
 
     /**
      * Second assumption. If only the GM has rolled/send messages in a session,
@@ -66,9 +64,6 @@ export class DataExtrapolationProcessor implements IDataProcessor {
         messages: s,
       };
     });
-    console.log("After filtering");
-    console.log(sessions.length);
-    console.log(sessions);
 
     return sessions;
   }
