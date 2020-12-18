@@ -1,5 +1,5 @@
 {
-  "name": "roll20 stats viewer backend",
+  "name": "stats-backend",
   "version": "1.0.0",
   "main": "server.js",
   "license": "ISC",
