@@ -1,7 +1,7 @@
 {
-  "name": "craig-as-a-service",
+  "name": "roll20-stats-viewer-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "license": "ISC",
   "keywords": [
     "node",
