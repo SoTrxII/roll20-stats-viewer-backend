@@ -4,7 +4,7 @@ import { InversifyExpressServer } from "inversify-express-utils";
 import "./controllers/info-controller";
 import { json } from "body-parser";
 import cors from "cors";
-export const PORT = 8089;
+export const PORT = process.env.PORT || 8089;
 // start the server
 const server = new InversifyExpressServer(cont);
 server.setConfig((app) => {
