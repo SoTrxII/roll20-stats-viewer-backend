@@ -2,4 +2,4 @@
 # turn on bash's job control
 set -m
 nginx&
-pm2-runtime server.js
+PORT=8089 pm2-runtime server.js
